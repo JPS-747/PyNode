@@ -73,6 +73,11 @@ class QuestionResponse(BaseModel):
 class CreateDatabaseSkill(BaseModel):
     skill_name: str = Field(min_length=1, max_length=255)
     db_type: str = Field(min_length=1, max_length=50)
+    host: Optional[str] = Field(default=None, max_length=255)
+    port: Optional[int] = None
+    user: Optional[str] = Field(default=None, max_length=255)
+    password: Optional[str] = Field(default=None, max_length=255)
+    database: Optional[str] = Field(default=None, max_length=255)
     tables: str = Field(max_length=2000)
     queries: str = Field(max_length=10000)
 
@@ -82,6 +87,11 @@ class DatabaseSkillResponse(BaseModel):
     user_id: int
     skill_name: str
     db_type: str
+    host: Optional[str] = None
+    port: Optional[int] = None
+    user: Optional[str] = None
+    password: Optional[str] = None
+    database: Optional[str] = None
     tables: str
     queries: str
     created_at: datetime

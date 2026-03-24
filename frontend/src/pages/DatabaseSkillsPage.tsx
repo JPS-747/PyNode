@@ -16,6 +16,11 @@ export default function DatabaseSkillsPage() {
     const [formData, setFormData] = useState({
         skillName: "",
         db: "sqlite",
+        host: "",
+        port: "",
+        user: "",
+        password: "",
+        database: "",
         tables: "",
         queries: "",
     });
@@ -68,6 +73,11 @@ export default function DatabaseSkillsPage() {
             const payload: CreateDatabaseSkillPayload = {
                 skill_name: formData.skillName,
                 db_type: formData.db,
+                host: formData.host || null,
+                port: formData.port ? parseInt(formData.port) : null,
+                user: formData.user || null,
+                password: formData.password || null,
+                database: formData.database || null,
                 tables: formData.tables,
                 queries: formData.queries,
             };
@@ -76,6 +86,11 @@ export default function DatabaseSkillsPage() {
             setFormData({
                 skillName: "",
                 db: "sqlite",
+                host: "",
+                port: "",
+                user: "",
+                password: "",
+                database: "",
                 tables: "",
                 queries: "",
             });
@@ -160,6 +175,75 @@ export default function DatabaseSkillsPage() {
                         </select>
                     </div>
 
+                    {formData.db !== "sqlite" && (
+                        <>
+                            <div className="db-form-group">
+                                <label htmlFor="host">Host</label>
+                                <input
+                                    id="host"
+                                    type="text"
+                                    name="host"
+                                    value={formData.host}
+                                    onChange={handleInputChange}
+                                    placeholder="e.g., localhost"
+                                    disabled={loading}
+                                />
+                            </div>
+
+                            <div className="db-form-group">
+                                <label htmlFor="port">Port</label>
+                                <input
+                                    id="port"
+                                    type="number"
+                                    name="port"
+                                    value={formData.port}
+                                    onChange={handleInputChange}
+                                    placeholder="e.g., 5432"
+                                    disabled={loading}
+                                />
+                            </div>
+
+                            <div className="db-form-group">
+                                <label htmlFor="user">User</label>
+                                <input
+                                    id="user"
+                                    type="text"
+                                    name="user"
+                                    value={formData.user}
+                                    onChange={handleInputChange}
+                                    placeholder="e.g., postgres"
+                                    disabled={loading}
+                                />
+                            </div>
+
+                            <div className="db-form-group">
+                                <label htmlFor="password">Password</label>
+                                <input
+                                    id="password"
+                                    type="password"
+                                    name="password"
+                                    value={formData.password}
+                                    onChange={handleInputChange}
+                                    placeholder="Database password"
+                                    disabled={loading}
+                                />
+                            </div>
+
+                            <div className="db-form-group">
+                                <label htmlFor="database">Database</label>
+                                <input
+                                    id="database"
+                                    type="text"
+                                    name="database"
+                                    value={formData.database}
+                                    onChange={handleInputChange}
+                                    placeholder="e.g., myapp_db"
+                                    disabled={loading}
+                                />
+                            </div>
+                        </>
+                    )}
+
                     <div className="db-form-group">
                         <label htmlFor="tables">Tables (comma-separated)</label>
                         <input
@@ -216,6 +300,21 @@ export default function DatabaseSkillsPage() {
                                 </div>
 
                                 <div className="db-item-details">
+                                    {skill.host && (
+                                        <div className="db-detail">
+                                            <strong>Host:</strong> {skill.host}
+                                        </div>
+                                    )}
+                                    {skill.port && (
+                                        <div className="db-detail">
+                                            <strong>Port:</strong> {skill.port}
+                                        </div>
+                                    )}
+                                    {skill.database && (
+                                        <div className="db-detail">
+                                            <strong>Database:</strong> {skill.database}
+                                        </div>
+                                    )}
                                     {skill.tables && (
                                         <div className="db-detail">
                                             <strong>Tables:</strong> {skill.tables}

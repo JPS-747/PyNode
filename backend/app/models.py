@@ -34,6 +34,11 @@ class DatabaseSkill(SQLModel, table=True):
     user_id: int = Field(foreign_key="user.id")
     skill_name: str = Field(min_length=1, max_length=255)
     db_type: str = Field(min_length=1, max_length=50)  # sqlite, postgres, mysql, etc.
+    host: Optional[str] = Field(default=None, max_length=255)  # database host
+    port: Optional[int] = Field(default=None)  # database port
+    user: Optional[str] = Field(default=None, max_length=255)  # database user
+    password: Optional[str] = Field(default=None, max_length=255)  # database password
+    database: Optional[str] = Field(default=None, max_length=255)  # database name
     tables: str = Field(max_length=2000)  # comma-separated table names
     queries: str = Field(max_length=10000)  # SQL queries
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)

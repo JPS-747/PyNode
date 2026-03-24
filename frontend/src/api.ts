@@ -61,6 +61,11 @@ interface QuestionResponse {
 interface CreateDatabaseSkillPayload {
     skill_name: string;
     db_type: string;
+    host?: string | null;
+    port?: number | null;
+    user?: string | null;
+    password?: string | null;
+    database?: string | null;
     tables: string;
     queries: string;
 }
@@ -70,6 +75,11 @@ interface DatabaseSkill {
     user_id: number;
     skill_name: string;
     db_type: string;
+    host?: string | null;
+    port?: number | null;
+    user?: string | null;
+    password?: string | null;
+    database?: string | null;
     tables: string;
     queries: string;
     created_at: string;
