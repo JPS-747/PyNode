@@ -5,6 +5,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { LandingPage } from './pages/LandingPage';
 import { TelegramSettingsPage } from './pages/TelegramSettingsPage';
+import { AISettingsPage } from './pages/AISettingsPage';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -20,6 +21,16 @@ const App: FC = () => {
                     <ProtectedRoute>
                         <Layout>
                             <TelegramSettingsPage />
+                        </Layout>
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/ai-settings"
+                element={
+                    <ProtectedRoute>
+                        <Layout>
+                            <AISettingsPage />
                         </Layout>
                     </ProtectedRoute>
                 }

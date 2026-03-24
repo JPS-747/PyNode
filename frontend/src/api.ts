@@ -10,6 +10,9 @@ interface UserResponse {
     full_name: string;
     telegram_bot_token?: string;
     telegram_chat_id?: string;
+    anthropic_api_key?: string;
+    openai_api_key?: string;
+    preferred_ai_provider?: string;
 }
 
 interface RegisterPayload {
@@ -30,6 +33,16 @@ interface RefreshTokenPayload {
 interface TelegramSettingsPayload {
     telegram_bot_token: string;
     telegram_chat_id: string;
+}
+
+interface AISettingsPayload {
+    preferred_ai_provider: string;
+    anthropic_api_key?: string;
+    openai_api_key?: string;
+}
+
+interface AITestMessagePayload {
+    message: string;
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
@@ -121,4 +134,46 @@ export async function sendTestTelegramMessage(token: string): Promise<{ message:
     return parseResponse<{ message: string }>(response);
 }
 
-export type { AuthResponse, UserResponse, RegisterPayload, LoginPayload, TelegramSettingsPayload };
+export async function setAISettings(
+    token: string,
+    payload: AISettingsPayload
+): Promise<UserResponse> {
+    const response = await fetch(`${API_BASE_URL}/auth/ai`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+    });
+
+    return parseResponse<UserResponse>(response);
+}
+
+export async function checkAISettings(token: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/ai`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    return parseResponse<{ message: string }>(response);
+}
+
+export async function sendTestAIMessage(
+    token: string,
+    payload: AITestMessagePayload
+): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/ai/test`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+    });
+
+    return parseResponse<{ message: string }>(response);
+}
+
+export type { AuthResponse, UserResponse, RegisterPayload, LoginPayload, TelegramSettingsPayload, AISettingsPayload, AITestMessagePayload };

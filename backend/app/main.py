@@ -14,6 +14,8 @@ from app.config import settings
 from app.database import create_db_and_tables, get_session
 from app.models import User
 from app.schemas import (
+    AISettings,
+    AITestMessage,
     MessageResponse,
     RefreshTokenRequest,
     TelegramSettings,
@@ -23,6 +25,7 @@ from app.schemas import (
     UserResponse,
 )
 from app.telegram_service import TelegramService
+from app.ai_service import AIService
 
 app = FastAPI(title=settings.app_name)
 
@@ -187,4 +190,99 @@ async def send_test_telegram_message(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to send test message: {str(e)}",
+        )
+
+
+@app.post("/auth/ai", response_model=UserResponse)
+def set_ai_settings(
+    payload: AISettings,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> UserResponse:
+    """Store user's AI provider credentials"""
+    if payload.preferred_ai_provider == "anthropic":
+        if not payload.anthropic_api_key:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Anthropic API key is required for Anthropic provider",
+            )
+        current_user.anthropic_api_key = payload.anthropic_api_key
+    elif payload.preferred_ai_provider == "openai":
+        if not payload.openai_api_key:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="OpenAI API key is required for OpenAI provider",
+            )
+        current_user.openai_api_key = payload.openai_api_key
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid AI provider. Must be 'anthropic' or 'openai'",
+        )
+
+    current_user.preferred_ai_provider = payload.preferred_ai_provider
+    session.add(current_user)
+    session.commit()
+    session.refresh(current_user)
+
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        full_name=current_user.full_name,
+        anthropic_api_key=current_user.anthropic_api_key,
+        openai_api_key=current_user.openai_api_key,
+        preferred_ai_provider=current_user.preferred_ai_provider,
+    )
+
+
+@app.get("/auth/ai", response_model=MessageResponse)
+def check_ai_settings(
+    current_user: User = Depends(get_current_user),
+) -> MessageResponse:
+    """Check if user has configured an AI provider"""
+    is_configured = bool(
+        current_user.preferred_ai_provider
+        and (
+            (
+                current_user.preferred_ai_provider == "anthropic"
+                and current_user.anthropic_api_key
+            )
+            or (
+                current_user.preferred_ai_provider == "openai"
+                and current_user.openai_api_key
+            )
+        )
+    )
+    return MessageResponse(message=f"AI configured: {is_configured}")
+
+
+@app.post("/auth/ai/test", response_model=MessageResponse)
+async def send_test_ai_message(
+    payload: AITestMessage, current_user: User = Depends(get_current_user)
+) -> MessageResponse:
+    """Send a test message to the configured AI provider"""
+    if not current_user.preferred_ai_provider:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="AI provider not configured. Please set it up first.",
+        )
+
+    try:
+        ai = AIService(
+            provider=current_user.preferred_ai_provider,
+            anthropic_api_key=current_user.anthropic_api_key,
+            openai_api_key=current_user.openai_api_key,
+        )
+
+        response = await ai.chat(payload.message)
+        return MessageResponse(message=response)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get AI response: {str(e)}",
         )

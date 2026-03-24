@@ -29,6 +29,9 @@ class UserResponse(BaseModel):
     full_name: str
     telegram_bot_token: Optional[str] = None
     telegram_chat_id: Optional[str] = None
+    anthropic_api_key: Optional[str] = None
+    openai_api_key: Optional[str] = None
+    preferred_ai_provider: Optional[str] = None
 
 
 class MessageResponse(BaseModel):
@@ -38,3 +41,13 @@ class MessageResponse(BaseModel):
 class TelegramSettings(BaseModel):
     telegram_bot_token: str = Field(min_length=10)
     telegram_chat_id: str
+
+
+class AISettings(BaseModel):
+    preferred_ai_provider: str = Field(min_length=1, max_length=20)  # "anthropic" or "openai"
+    anthropic_api_key: Optional[str] = None
+    openai_api_key: Optional[str] = None
+
+
+class AITestMessage(BaseModel):
+    message: str = Field(min_length=1, max_length=5000)
