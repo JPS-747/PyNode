@@ -157,3 +157,34 @@ def check_telegram_settings(
     return MessageResponse(
         message=f"Telegram configured: {is_configured}"
     )
+
+
+@app.post("/auth/telegram/test", response_model=MessageResponse)
+async def send_test_telegram_message(
+    current_user: User = Depends(get_current_user),
+) -> MessageResponse:
+    """Send a test message to user's Telegram bot"""
+    if not current_user.telegram_bot_token or not current_user.telegram_chat_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Telegram bot not configured. Please set it up first.",
+        )
+
+    telegram = TelegramService(
+        bot_token=current_user.telegram_bot_token,
+        chat_id=current_user.telegram_chat_id,
+    )
+
+    try:
+        await telegram.send_message(
+            f"✅ <b>Test Message Successful!</b>\n\n"
+            f"Your Telegram bot is correctly configured.\n"
+            f"<b>User:</b> {current_user.full_name}\n"
+            f"<b>Email:</b> {current_user.email}"
+        )
+        return MessageResponse(message="Test message sent successfully to your Telegram bot!")
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to send test message: {str(e)}",
+        )

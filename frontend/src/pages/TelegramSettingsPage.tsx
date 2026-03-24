@@ -1,6 +1,6 @@
 import { FC, useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import { checkTelegramSettings, setTelegramSettings } from '../api';
+import { checkTelegramSettings, setTelegramSettings, sendTestTelegramMessage } from '../api';
 import './TelegramSettingsPage.css';
 
 export const TelegramSettingsPage: FC = () => {
@@ -14,6 +14,8 @@ export const TelegramSettingsPage: FC = () => {
     const [success, setSuccess] = useState(false);
     const [isConfigured, setIsConfigured] = useState(false);
     const [checkingStatus, setCheckingStatus] = useState(true);
+    const [testLoading, setTestLoading] = useState(false);
+    const [testMessage, setTestMessage] = useState('');
 
     useEffect(() => {
         checkConfigurationStatus();
@@ -45,6 +47,7 @@ export const TelegramSettingsPage: FC = () => {
         e.preventDefault();
         setError('');
         setSuccess(false);
+        setTestMessage('');
 
         if (!formData.telegram_bot_token.trim()) {
             setError('Bot token is required');
@@ -75,6 +78,32 @@ export const TelegramSettingsPage: FC = () => {
             setError(err instanceof Error ? err.message : 'Failed to save settings');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleTestMessage = async () => {
+        setError('');
+        setTestMessage('');
+
+        if (!isConfigured) {
+            setError('Please save your settings first');
+            return;
+        }
+
+        if (!token) {
+            setError('Not authenticated');
+            return;
+        }
+
+        setTestLoading(true);
+        try {
+            const result = await sendTestTelegramMessage(token);
+            setTestMessage(result.message);
+            setTimeout(() => setTestMessage(''), 5000);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to send test message');
+        } finally {
+            setTestLoading(false);
         }
     };
 
@@ -116,10 +145,10 @@ export const TelegramSettingsPage: FC = () => {
                 <div className="settings-form-container">
                     <div
                         className={`status-indicator ${checkingStatus
-                                ? 'checking'
-                                : isConfigured
-                                    ? 'configured'
-                                    : 'not-configured'
+                            ? 'checking'
+                            : isConfigured
+                                ? 'configured'
+                                : 'not-configured'
                             }`}
                     >
                         <span className="status-dot"></span>
@@ -141,6 +170,12 @@ export const TelegramSettingsPage: FC = () => {
                     {error && (
                         <div className="banner banner-error">
                             <span>✕ {error}</span>
+                        </div>
+                    )}
+
+                    {testMessage && (
+                        <div className="banner banner-success">
+                            <span>✓ {testMessage}</span>
                         </div>
                     )}
 
@@ -190,6 +225,21 @@ export const TelegramSettingsPage: FC = () => {
                             {loading ? 'Saving...' : 'Save Settings'}
                         </button>
                     </form>
+
+                    {isConfigured && (
+                        <div className="test-section">
+                            <h3>Test Your Configuration</h3>
+                            <p>Send a test message to verify your bot is working correctly:</p>
+                            <button
+                                type="button"
+                                onClick={handleTestMessage}
+                                disabled={testLoading}
+                                className="test-button"
+                            >
+                                {testLoading ? 'Sending test message...' : 'Send Test Message'}
+                            </button>
+                        </div>
+                    )}
 
                     <div className="info-section">
                         <h3>Why do I need this?</h3>

@@ -110,4 +110,15 @@ export async function checkTelegramSettings(token: string): Promise<{ message: s
     return parseResponse<{ message: string }>(response);
 }
 
+export async function sendTestTelegramMessage(token: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/telegram/test`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    return parseResponse<{ message: string }>(response);
+}
+
 export type { AuthResponse, UserResponse, RegisterPayload, LoginPayload, TelegramSettingsPayload };

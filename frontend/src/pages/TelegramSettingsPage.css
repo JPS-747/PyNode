@@ -266,6 +266,52 @@
   cursor: not-allowed;
 }
 
+.test-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: var(--code-bg, #f5f5f5);
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #ddd);
+}
+
+.test-section h3 {
+  color: var(--text-primary, #000);
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+}
+
+.test-section p {
+  color: var(--text-secondary, #666);
+  margin: 0.5rem 0 1rem 0;
+  font-size: 0.95rem;
+}
+
+.test-button {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(
+    135deg,
+    var(--primary, #4f8cff),
+    var(--secondary, #7c4dff)
+  );
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.test-button:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.test-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .info-section {
   margin-top: 2rem;
   padding-top: 2rem;
