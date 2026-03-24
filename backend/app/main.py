@@ -308,9 +308,9 @@ def ask_question(
 
         # Initialize AI service with user's keys
         ai_service = AIService(
+            provider=current_user.preferred_ai_provider or "anthropic",
             anthropic_api_key=current_user.anthropic_api_key,
             openai_api_key=current_user.openai_api_key,
-            preferred_provider=current_user.preferred_ai_provider or "anthropic",
         )
 
         # Get AI response
