@@ -69,14 +69,16 @@ export default function QAPage() {
             {/* Question Form */}
             <div className="qa-form-wrapper">
                 <form onSubmit={handleAskQuestion} className="qa-form">
-                    <textarea
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        placeholder="Ask a question..."
-                        disabled={loading}
-                        className="qa-textarea"
-                        rows={4}
-                    />
+                    <div className="qa-textarea-wrapper">
+                        <textarea
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            placeholder="Ask a question..."
+                            disabled={loading}
+                            className="qa-textarea"
+                            rows={4}
+                        />
+                    </div>
                     <button
                         type="submit"
                         disabled={loading || !input.trim()}

@@ -35,10 +35,31 @@
   gap: 1rem;
 }
 
+.qa-textarea-wrapper {
+  border: 2px solid var(--accent-color);
+  border-radius: 8px;
+  padding: 2px;
+  background: linear-gradient(
+    135deg,
+    var(--accent-color),
+    rgba(59, 130, 246, 0.5)
+  );
+  box-shadow:
+    0 0 12px rgba(59, 130, 246, 0.2),
+    inset 0 0 12px rgba(59, 130, 246, 0.1);
+  transition: all 0.3s ease;
+}
+
+.qa-textarea-wrapper:focus-within {
+  box-shadow:
+    0 0 20px rgba(59, 130, 246, 0.4),
+    inset 0 0 12px rgba(59, 130, 246, 0.15);
+}
+
 .qa-textarea {
   width: 100%;
   padding: 1rem;
-  border: 1px solid var(--border-color);
+  border: none;
   border-radius: 6px;
   font-family: inherit;
   font-size: 1rem;
@@ -52,7 +73,6 @@
 
 .qa-textarea:focus {
   outline: none;
-  border-color: var(--accent-color);
   background: var(--bg-primary);
 }
 
@@ -206,6 +226,10 @@
   .qa-form-wrapper,
   .qa-list-wrapper {
     padding: 1rem;
+  }
+
+  .qa-textarea-wrapper {
+    padding: 1px;
   }
 
   .qa-button {
