@@ -4,7 +4,6 @@ import { DashboardPage } from './pages/DashboardPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { LandingPage } from './pages/LandingPage';
-import { ContactPage } from './pages/ContactPage';
 import { TelegramSettingsPage } from './pages/TelegramSettingsPage';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -21,16 +20,6 @@ const App: FC = () => {
                     <ProtectedRoute>
                         <Layout>
                             <TelegramSettingsPage />
-                        </Layout>
-                    </ProtectedRoute>
-                }
-            />
-            <Route
-                path="/contact"
-                element={
-                    <ProtectedRoute>
-                        <Layout>
-                            <ContactPage />
                         </Layout>
                     </ProtectedRoute>
                 }

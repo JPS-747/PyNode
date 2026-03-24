@@ -14,7 +14,6 @@ from app.config import settings
 from app.database import create_db_and_tables, get_session
 from app.models import User
 from app.schemas import (
-    ContactMessage,
     MessageResponse,
     RefreshTokenRequest,
     TelegramSettings,
@@ -158,39 +157,3 @@ def check_telegram_settings(
     return MessageResponse(
         message=f"Telegram configured: {is_configured}"
     )
-
-
-@app.post("/api/contact", response_model=MessageResponse)
-async def send_contact_message(
-    payload: ContactMessage, current_user: User = Depends(get_current_user)
-) -> MessageResponse:
-    """Send a contact message via user's personal Telegram bot"""
-    if not current_user.telegram_bot_token or not current_user.telegram_chat_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Telegram bot not configured. Please set it up in settings.",
-        )
-
-    telegram = TelegramService(
-        bot_token=current_user.telegram_bot_token,
-        chat_id=current_user.telegram_chat_id,
-    )
-
-    try:
-        await telegram.send_contact_message(
-            user_email=current_user.email,
-            user_name=current_user.full_name,
-            subject=payload.subject,
-            message=payload.message,
-        )
-        return MessageResponse(message="Message sent successfully to your Telegram bot")
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e),
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to send message. Check your bot token and chat ID.",
-        )

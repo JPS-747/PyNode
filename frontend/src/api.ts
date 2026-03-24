@@ -27,11 +27,6 @@ interface RefreshTokenPayload {
     refresh_token: string;
 }
 
-interface ContactMessagePayload {
-    subject: string;
-    message: string;
-}
-
 interface TelegramSettingsPayload {
     telegram_bot_token: string;
     telegram_chat_id: string;
@@ -89,22 +84,6 @@ export async function refreshAccessToken(refreshToken: string): Promise<AuthResp
     return parseResponse<AuthResponse>(response);
 }
 
-export async function sendContactMessage(
-    token: string,
-    payload: ContactMessagePayload
-): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_URL}/api/contact`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-    });
-
-    return parseResponse<{ message: string }>(response);
-}
-
 export async function setTelegramSettings(
     token: string,
     payload: TelegramSettingsPayload
@@ -131,4 +110,4 @@ export async function checkTelegramSettings(token: string): Promise<{ message: s
     return parseResponse<{ message: string }>(response);
 }
 
-export type { AuthResponse, UserResponse, RegisterPayload, LoginPayload, ContactMessagePayload, TelegramSettingsPayload };
+export type { AuthResponse, UserResponse, RegisterPayload, LoginPayload, TelegramSettingsPayload };

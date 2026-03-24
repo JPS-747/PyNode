@@ -35,11 +35,6 @@ class MessageResponse(BaseModel):
     message: str
 
 
-class ContactMessage(BaseModel):
-    subject: str = Field(min_length=3, max_length=200)
-    message: str = Field(min_length=10, max_length=5000)
-
-
 class TelegramSettings(BaseModel):
     telegram_bot_token: str = Field(min_length=10)
     telegram_chat_id: str
