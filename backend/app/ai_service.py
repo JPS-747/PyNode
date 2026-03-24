@@ -41,9 +41,9 @@ class AIService:
     async def chat(self, message: str) -> str:
         """Send a message to the configured AI provider and get a response"""
         if self.provider == "anthropic":
-            return await self._chat_with_claude(message)
+            return self._chat_with_claude(message)
         elif self.provider == "openai":
-            return await self._chat_with_openai(message)
+            return self._chat_with_openai(message)
         raise ValueError(f"Unsupported AI provider: {self.provider}")
 
     def _chat_with_claude(self, message: str) -> str:
@@ -60,7 +60,7 @@ class AIService:
         except anthropic.APIError as e:
             raise ValueError(f"Claude API error: {str(e)}")
 
-    async def _chat_with_openai(self, message: str) -> str:
+    def _chat_with_openai(self, message: str) -> str:
         """Chat with OpenAI GPT using official SDK"""
         try:
             response = self.openai_client.chat.completions.create(
