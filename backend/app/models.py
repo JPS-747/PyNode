@@ -11,3 +11,6 @@ class User(SQLModel, table=True):
     full_name: str
     hashed_password: str
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    # Telegram bot credentials (optional)
+    telegram_bot_token: Optional[str] = Field(default=None)
+    telegram_chat_id: Optional[str] = Field(default=None)

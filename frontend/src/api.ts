@@ -8,6 +8,8 @@ interface UserResponse {
     id: number;
     email: string;
     full_name: string;
+    telegram_bot_token?: string;
+    telegram_chat_id?: string;
 }
 
 interface RegisterPayload {
@@ -28,6 +30,11 @@ interface RefreshTokenPayload {
 interface ContactMessagePayload {
     subject: string;
     message: string;
+}
+
+interface TelegramSettingsPayload {
+    telegram_bot_token: string;
+    telegram_chat_id: string;
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
@@ -98,4 +105,30 @@ export async function sendContactMessage(
     return parseResponse<{ message: string }>(response);
 }
 
-export type { AuthResponse, UserResponse, RegisterPayload, LoginPayload, ContactMessagePayload };
+export async function setTelegramSettings(
+    token: string,
+    payload: TelegramSettingsPayload
+): Promise<UserResponse> {
+    const response = await fetch(`${API_BASE_URL}/auth/telegram`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+    });
+
+    return parseResponse<UserResponse>(response);
+}
+
+export async function checkTelegramSettings(token: string): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/auth/telegram`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    return parseResponse<{ message: string }>(response);
+}
+
+export type { AuthResponse, UserResponse, RegisterPayload, LoginPayload, ContactMessagePayload, TelegramSettingsPayload };

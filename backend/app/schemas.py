@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -26,6 +27,8 @@ class UserResponse(BaseModel):
     id: int
     email: EmailStr
     full_name: str
+    telegram_bot_token: Optional[str] = None
+    telegram_chat_id: Optional[str] = None
 
 
 class MessageResponse(BaseModel):
@@ -35,3 +38,8 @@ class MessageResponse(BaseModel):
 class ContactMessage(BaseModel):
     subject: str = Field(min_length=3, max_length=200)
     message: str = Field(min_length=10, max_length=5000)
+
+
+class TelegramSettings(BaseModel):
+    telegram_bot_token: str = Field(min_length=10)
+    telegram_chat_id: str

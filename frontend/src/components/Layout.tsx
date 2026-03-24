@@ -30,6 +30,7 @@ export const Layout: FC<LayoutProps> = ({ children }) => {
     const navItems = [
         { label: 'Dashboard', path: '/dashboard' },
         { label: 'Contact', path: '/contact' },
+        { label: 'Telegram Settings', path: '/telegram-settings' },
     ];
 
     const handleNavClick = (path: string): void => {

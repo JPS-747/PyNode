@@ -17,6 +17,7 @@ from app.schemas import (
     ContactMessage,
     MessageResponse,
     RefreshTokenRequest,
+    TelegramSettings,
     TokenResponse,
     UserLogin,
     UserRegister,
@@ -116,7 +117,46 @@ def refresh_access_token(
 @app.get("/auth/me", response_model=UserResponse)
 def read_current_user(current_user: User = Depends(get_current_user)) -> UserResponse:
     return UserResponse(
-        id=current_user.id, email=current_user.email, full_name=current_user.full_name
+        id=current_user.id,
+        email=current_user.email,
+        full_name=current_user.full_name,
+        telegram_bot_token=current_user.telegram_bot_token,
+        telegram_chat_id=current_user.telegram_chat_id,
+    )
+
+
+@app.post("/auth/telegram", response_model=UserResponse)
+def set_telegram_settings(
+    payload: TelegramSettings,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> UserResponse:
+    """Store user's Telegram bot credentials"""
+    current_user.telegram_bot_token = payload.telegram_bot_token
+    current_user.telegram_chat_id = payload.telegram_chat_id
+    session.add(current_user)
+    session.commit()
+    session.refresh(current_user)
+
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        full_name=current_user.full_name,
+        telegram_bot_token=current_user.telegram_bot_token,
+        telegram_chat_id=current_user.telegram_chat_id,
+    )
+
+
+@app.get("/auth/telegram", response_model=MessageResponse)
+def check_telegram_settings(
+    current_user: User = Depends(get_current_user),
+) -> MessageResponse:
+    """Check if user has configured Telegram bot"""
+    is_configured = bool(
+        current_user.telegram_bot_token and current_user.telegram_chat_id
+    )
+    return MessageResponse(
+        message=f"Telegram configured: {is_configured}"
     )
 
 
@@ -124,17 +164,17 @@ def read_current_user(current_user: User = Depends(get_current_user)) -> UserRes
 async def send_contact_message(
     payload: ContactMessage, current_user: User = Depends(get_current_user)
 ) -> MessageResponse:
-    """Send a contact message via Telegram bot"""
-    telegram = TelegramService(
-        bot_token=settings.telegram_bot_token,
-        chat_id=settings.telegram_chat_id,
-    )
-
-    if not telegram.is_configured():
+    """Send a contact message via user's personal Telegram bot"""
+    if not current_user.telegram_bot_token or not current_user.telegram_chat_id:
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Telegram bot is not configured. Please contact support.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Telegram bot not configured. Please set it up in settings.",
         )
+
+    telegram = TelegramService(
+        bot_token=current_user.telegram_bot_token,
+        chat_id=current_user.telegram_chat_id,
+    )
 
     try:
         await telegram.send_contact_message(
@@ -143,7 +183,7 @@ async def send_contact_message(
             subject=payload.subject,
             message=payload.message,
         )
-        return MessageResponse(message="Message sent successfully")
+        return MessageResponse(message="Message sent successfully to your Telegram bot")
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -152,5 +192,5 @@ async def send_contact_message(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to send message. Please try again later.",
+            detail="Failed to send message. Check your bot token and chat ID.",
         )
