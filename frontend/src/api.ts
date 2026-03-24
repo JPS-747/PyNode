@@ -58,6 +58,32 @@ interface QuestionResponse {
     updated_at: string;
 }
 
+interface CreateDatabaseSkillPayload {
+    skill_name: string;
+    db_type: string;
+    tables: string;
+    queries: string;
+}
+
+interface DatabaseSkill {
+    id: number;
+    user_id: number;
+    skill_name: string;
+    db_type: string;
+    tables: string;
+    queries: string;
+    created_at: string;
+    updated_at: string;
+}
+
+interface TestDatabaseSkillPayload {
+    test_query: string;
+}
+
+interface TestDatabaseSkillResponse {
+    result: string;
+}
+
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
@@ -216,5 +242,48 @@ export async function getQuestions(token: string): Promise<QuestionResponse[]> {
     return parseResponse<QuestionResponse[]>(response);
 }
 
-export type { AuthResponse, UserResponse, RegisterPayload, LoginPayload, TelegramSettingsPayload, AISettingsPayload, AITestMessagePayload, QuestionPayload, QuestionResponse };
+export async function createDatabaseSkill(
+    token: string,
+    payload: CreateDatabaseSkillPayload
+): Promise<DatabaseSkill> {
+    const response = await fetch(`${API_BASE_URL}/api/database-skills`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+    });
+
+    return parseResponse<DatabaseSkill>(response);
+}
+
+export async function getDatabaseSkills(token: string): Promise<DatabaseSkill[]> {
+    const response = await fetch(`${API_BASE_URL}/api/database-skills`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    return parseResponse<DatabaseSkill[]>(response);
+}
+
+export async function testDatabaseSkill(
+    token: string,
+    skillId: number,
+    payload: TestDatabaseSkillPayload
+): Promise<TestDatabaseSkillResponse> {
+    const response = await fetch(`${API_BASE_URL}/api/database-skills/${skillId}/test`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+    });
+
+    return parseResponse<TestDatabaseSkillResponse>(response);
+}
+
+export type { AuthResponse, UserResponse, RegisterPayload, LoginPayload, TelegramSettingsPayload, AISettingsPayload, AITestMessagePayload, QuestionPayload, QuestionResponse, CreateDatabaseSkillPayload, DatabaseSkill, TestDatabaseSkillPayload, TestDatabaseSkillResponse };
 

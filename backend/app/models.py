@@ -27,3 +27,14 @@ class Question(SQLModel, table=True):
     answer: str = Field(min_length=1, max_length=50000)
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+
+
+class DatabaseSkill(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id")
+    skill_name: str = Field(min_length=1, max_length=255)
+    db_type: str = Field(min_length=1, max_length=50)  # sqlite, postgres, mysql, etc.
+    tables: str = Field(max_length=2000)  # comma-separated table names
+    queries: str = Field(max_length=10000)  # SQL queries
+    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)

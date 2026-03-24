@@ -68,3 +68,32 @@ class QuestionResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class CreateDatabaseSkill(BaseModel):
+    skill_name: str = Field(min_length=1, max_length=255)
+    db_type: str = Field(min_length=1, max_length=50)
+    tables: str = Field(max_length=2000)
+    queries: str = Field(max_length=10000)
+
+
+class DatabaseSkillResponse(BaseModel):
+    id: int
+    user_id: int
+    skill_name: str
+    db_type: str
+    tables: str
+    queries: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class TestDatabaseSkill(BaseModel):
+    test_query: str = Field(min_length=1, max_length=5000)
+
+
+class TestDatabaseSkillResponse(BaseModel):
+    result: str

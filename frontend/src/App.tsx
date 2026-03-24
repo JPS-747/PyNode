@@ -7,6 +7,7 @@ import { LandingPage } from './pages/LandingPage';
 import { TelegramSettingsPage } from './pages/TelegramSettingsPage';
 import { AISettingsPage } from './pages/AISettingsPage';
 import QAPage from './pages/QAPage';
+import DatabaseSkillsPage from './pages/DatabaseSkillsPage';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -42,6 +43,16 @@ const App: FC = () => {
                     <ProtectedRoute>
                         <Layout>
                             <QAPage />
+                        </Layout>
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/database-skills"
+                element={
+                    <ProtectedRoute>
+                        <Layout>
+                            <DatabaseSkillsPage />
                         </Layout>
                     </ProtectedRoute>
                 }

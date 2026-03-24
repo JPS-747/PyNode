@@ -12,13 +12,17 @@ from app.auth import (
 )
 from app.config import settings
 from app.database import create_db_and_tables, get_session
-from app.models import User, Question
+from app.models import User, Question, DatabaseSkill
 from app.schemas import (
     AISettings,
     AITestMessage,
     MessageResponse,
     QuestionCreate,
     QuestionResponse,
+    CreateDatabaseSkill,
+    DatabaseSkillResponse,
+    TestDatabaseSkill,
+    TestDatabaseSkillResponse,
     RefreshTokenRequest,
     TelegramSettings,
     TokenResponse,
@@ -292,7 +296,7 @@ async def send_test_ai_message(
 
 # Q&A Endpoints
 @app.post("/api/questions", response_model=QuestionResponse)
-def ask_question(
+async def ask_question(
     question_data: QuestionCreate,
     current_user: User = Depends(get_current_user),
     session: Session = Depends(get_session),
@@ -314,7 +318,7 @@ def ask_question(
         )
 
         # Get AI response
-        answer = ai_service.chat(question_data.question)
+        answer = await ai_service.chat(question_data.question)
 
         # Save to database
         db_question = Question(
@@ -372,4 +376,107 @@ def get_questions(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to retrieve questions: {str(e)}",
+        )
+
+
+# Database Skills Endpoints
+@app.post("/api/database-skills", response_model=DatabaseSkillResponse)
+def create_database_skill(
+    skill_data: CreateDatabaseSkill,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> DatabaseSkillResponse:
+    """Create a new database skill."""
+    try:
+        db_skill = DatabaseSkill(
+            user_id=current_user.id,
+            skill_name=skill_data.skill_name,
+            db_type=skill_data.db_type,
+            tables=skill_data.tables,
+            queries=skill_data.queries,
+        )
+        session.add(db_skill)
+        session.commit()
+        session.refresh(db_skill)
+
+        return DatabaseSkillResponse(
+            id=db_skill.id,
+            user_id=db_skill.user_id,
+            skill_name=db_skill.skill_name,
+            db_type=db_skill.db_type,
+            tables=db_skill.tables,
+            queries=db_skill.queries,
+            created_at=db_skill.created_at,
+            updated_at=db_skill.updated_at,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create database skill: {str(e)}",
+        )
+
+
+@app.get("/api/database-skills", response_model=list[DatabaseSkillResponse])
+def get_database_skills(
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> list[DatabaseSkillResponse]:
+    """Get all database skills for the current user."""
+    try:
+        skills = session.exec(
+            select(DatabaseSkill).where(DatabaseSkill.user_id == current_user.id)
+        ).all()
+
+        return [
+            DatabaseSkillResponse(
+                id=s.id,
+                user_id=s.user_id,
+                skill_name=s.skill_name,
+                db_type=s.db_type,
+                tables=s.tables,
+                queries=s.queries,
+                created_at=s.created_at,
+                updated_at=s.updated_at,
+            )
+            for s in skills
+        ]
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve database skills: {str(e)}",
+        )
+
+
+@app.post("/api/database-skills/{skill_id}/test", response_model=TestDatabaseSkillResponse)
+def test_database_skill(
+    skill_id: int,
+    test_data: TestDatabaseSkill,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> TestDatabaseSkillResponse:
+    """Test execute a query on a database skill."""
+    try:
+        skill = session.exec(
+            select(DatabaseSkill).where(
+                (DatabaseSkill.id == skill_id) & (DatabaseSkill.user_id == current_user.id)
+            )
+        ).first()
+
+        if not skill:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Database skill not found",
+            )
+
+        # Simple query execution (in production, use proper database connection)
+        # For now, return a mock result
+        result = f"Query executed on {skill.db_type} database.\nTables: {skill.tables}\n\nTest Query: {test_data.test_query}\n\nNote: This is a mock result. Implement actual database connection for real queries."
+
+        return TestDatabaseSkillResponse(result=result)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to test database skill: {str(e)}",
         )
