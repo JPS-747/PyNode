@@ -18,3 +18,12 @@ class User(SQLModel, table=True):
     anthropic_api_key: Optional[str] = Field(default=None)
     openai_api_key: Optional[str] = Field(default=None)
     preferred_ai_provider: Optional[str] = Field(default=None)  # "anthropic" or "openai"
+
+
+class Question(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="user.id")
+    question: str = Field(min_length=1, max_length=10000)
+    answer: str = Field(min_length=1, max_length=50000)
+    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)

@@ -29,6 +29,7 @@ export const Layout: FC<LayoutProps> = ({ children }) => {
 
     const navItems = [
         { label: 'Dashboard', path: '/dashboard' },
+        { label: 'Q&A', path: '/qa' },
         { label: 'Telegram Settings', path: '/telegram-settings' },
         { label: 'AI Settings', path: '/ai-settings' },
     ];

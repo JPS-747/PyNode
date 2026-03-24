@@ -6,6 +6,7 @@ import { RegisterPage } from './pages/RegisterPage';
 import { LandingPage } from './pages/LandingPage';
 import { TelegramSettingsPage } from './pages/TelegramSettingsPage';
 import { AISettingsPage } from './pages/AISettingsPage';
+import QAPage from './pages/QAPage';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -31,6 +32,16 @@ const App: FC = () => {
                     <ProtectedRoute>
                         <Layout>
                             <AISettingsPage />
+                        </Layout>
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/qa"
+                element={
+                    <ProtectedRoute>
+                        <Layout>
+                            <QAPage />
                         </Layout>
                     </ProtectedRoute>
                 }

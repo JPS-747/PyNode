@@ -1,4 +1,5 @@
 from typing import Optional
+from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -51,3 +52,19 @@ class AISettings(BaseModel):
 
 class AITestMessage(BaseModel):
     message: str = Field(min_length=1, max_length=5000)
+
+
+class QuestionCreate(BaseModel):
+    question: str = Field(min_length=1, max_length=10000)
+
+
+class QuestionResponse(BaseModel):
+    id: int
+    user_id: int
+    question: str
+    answer: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True

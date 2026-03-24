@@ -12,11 +12,13 @@ from app.auth import (
 )
 from app.config import settings
 from app.database import create_db_and_tables, get_session
-from app.models import User
+from app.models import User, Question
 from app.schemas import (
     AISettings,
     AITestMessage,
     MessageResponse,
+    QuestionCreate,
+    QuestionResponse,
     RefreshTokenRequest,
     TelegramSettings,
     TokenResponse,
@@ -285,4 +287,89 @@ async def send_test_ai_message(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get AI response: {str(e)}",
+        )
+
+
+# Q&A Endpoints
+@app.post("/api/questions", response_model=QuestionResponse)
+def ask_question(
+    question_data: QuestionCreate,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> QuestionResponse:
+    """Ask a question and get a response from the AI."""
+    try:
+        # Check if user has AI configured
+        if not current_user.anthropic_api_key and not current_user.openai_api_key:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="AI not configured. Please set up AI settings first.",
+            )
+
+        # Initialize AI service with user's keys
+        ai_service = AIService(
+            anthropic_api_key=current_user.anthropic_api_key,
+            openai_api_key=current_user.openai_api_key,
+            preferred_provider=current_user.preferred_ai_provider or "anthropic",
+        )
+
+        # Get AI response
+        answer = ai_service.chat(question_data.question)
+
+        # Save to database
+        db_question = Question(
+            user_id=current_user.id,
+            question=question_data.question,
+            answer=answer,
+        )
+        session.add(db_question)
+        session.commit()
+        session.refresh(db_question)
+
+        return QuestionResponse(
+            id=db_question.id,
+            user_id=db_question.user_id,
+            question=db_question.question,
+            answer=db_question.answer,
+            created_at=db_question.created_at,
+            updated_at=db_question.updated_at,
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to process question: {str(e)}",
+        )
+
+
+@app.get("/api/questions", response_model=list[QuestionResponse])
+def get_questions(
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session),
+) -> list[QuestionResponse]:
+    """Get all questions and answers for the current user."""
+    try:
+        questions = session.exec(
+            select(Question).where(Question.user_id == current_user.id)
+        ).all()
+        
+        return [
+            QuestionResponse(
+                id=q.id,
+                user_id=q.user_id,
+                question=q.question,
+                answer=q.answer,
+                created_at=q.created_at,
+                updated_at=q.updated_at,
+            )
+            for q in questions
+        ]
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to retrieve questions: {str(e)}",
         )

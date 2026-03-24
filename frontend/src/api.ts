@@ -45,6 +45,20 @@ interface AITestMessagePayload {
     message: string;
 }
 
+interface QuestionPayload {
+    question: string;
+}
+
+interface QuestionResponse {
+    id: number;
+    user_id: number;
+    question: string;
+    answer: string;
+    created_at: string;
+    updated_at: string;
+}
+
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 async function parseResponse<T>(response: Response): Promise<T> {
@@ -176,4 +190,31 @@ export async function sendTestAIMessage(
     return parseResponse<{ message: string }>(response);
 }
 
-export type { AuthResponse, UserResponse, RegisterPayload, LoginPayload, TelegramSettingsPayload, AISettingsPayload, AITestMessagePayload };
+export async function askQuestion(
+    token: string,
+    payload: QuestionPayload
+): Promise<QuestionResponse> {
+    const response = await fetch(`${API_BASE_URL}/api/questions`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+    });
+
+    return parseResponse<QuestionResponse>(response);
+}
+
+export async function getQuestions(token: string): Promise<QuestionResponse[]> {
+    const response = await fetch(`${API_BASE_URL}/api/questions`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+
+    return parseResponse<QuestionResponse[]>(response);
+}
+
+export type { AuthResponse, UserResponse, RegisterPayload, LoginPayload, TelegramSettingsPayload, AISettingsPayload, AITestMessagePayload, QuestionPayload, QuestionResponse };
+
