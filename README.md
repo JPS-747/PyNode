@@ -65,25 +65,22 @@ rag/
 ### Backend Setup
 
 1. **Navigate to backend directory:**
-
    ```bash
    cd backend
    ```
 
 2. **Create virtual environment:**
-
    ```bash
    python -m venv .venv
-
+   
    # Windows
    .\.venv\Scripts\Activate.ps1
-
+   
    # macOS/Linux
    source .venv/bin/activate
    ```
 
 3. **Install dependencies:**
-
    ```bash
    pip install -r requirements.txt
    ```
@@ -98,13 +95,11 @@ rag/
 ### Frontend Setup
 
 1. **Navigate to frontend directory:**
-
    ```bash
    cd frontend
    ```
 
 2. **Install dependencies:**
-
    ```bash
    npm install
    ```
@@ -389,5 +384,3 @@ See [CHANGELOG.md](.github/CHANGELOG.md) for complete version history and roadma
 ---
 
 **Happy coding! 🚀**
-#   P y N o d e  
- 
