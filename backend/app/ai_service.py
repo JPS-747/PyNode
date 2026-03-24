@@ -46,11 +46,11 @@ class AIService:
             return await self._chat_with_openai(message)
         raise ValueError(f"Unsupported AI provider: {self.provider}")
 
-    async def _chat_with_claude(self, message: str) -> str:
+    def _chat_with_claude(self, message: str) -> str:
         """Chat with Anthropic Claude using official SDK"""
         try:
             response = self.anthropic_client.messages.create(
-                model="claude-sonnet-4.6",
+                model="claude-sonnet-4-6",
                 max_tokens=1024,
                 messages=[{"role": "user", "content": message}],
             )
