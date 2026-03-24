@@ -1,4 +1,6 @@
 import httpx
+import anthropic
+import openai
 from typing import Optional
 
 
@@ -14,14 +16,17 @@ class AIService:
         self.provider = provider.lower()
         self.anthropic_api_key = anthropic_api_key
         self.openai_api_key = openai_api_key
-        self.timeout = httpx.Timeout(30.0)
 
         if self.provider == "anthropic":
             if not self.anthropic_api_key:
                 raise ValueError("Anthropic API key is required")
+            self.anthropic_client = anthropic.Anthropic(
+                api_key=self.anthropic_api_key
+            )
         elif self.provider == "openai":
             if not self.openai_api_key:
                 raise ValueError("OpenAI API key is required")
+            self.openai_client = openai.OpenAI(api_key=self.openai_api_key)
         else:
             raise ValueError(f"Unsupported AI provider: {provider}")
 
@@ -42,54 +47,29 @@ class AIService:
         raise ValueError(f"Unsupported AI provider: {self.provider}")
 
     async def _chat_with_claude(self, message: str) -> str:
-        """Chat with Anthropic Claude"""
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            response = await client.post(
-                "https://api.anthropic.com/v1/messages",
-                headers={
-                    "x-api-key": self.anthropic_api_key,
-                    "anthropic-version": "2023-06-01",
-                    "content-type": "application/json",
-                },
-                json={
-                    "model": "claude-3-5-haiku-20241022",
-                    "max_tokens": 1024,
-                    "messages": [{"role": "user", "content": message}],
-                },
+        """Chat with Anthropic Claude using official SDK"""
+        try:
+            response = self.anthropic_client.messages.create(
+                model="claude-sonnet-4.6",
+                max_tokens=1024,
+                messages=[{"role": "user", "content": message}],
             )
-
-            if response.status_code != 200:
-                raise ValueError(
-                    f"Claude API error: {response.status_code} - {response.text}"
-                )
-
-            data = response.json()
-            if "content" in data and len(data["content"]) > 0:
-                return data["content"][0]["text"]
+            if response.content and len(response.content) > 0:
+                return response.content[0].text
             raise ValueError("No response from Claude API")
+        except anthropic.APIError as e:
+            raise ValueError(f"Claude API error: {str(e)}")
 
     async def _chat_with_openai(self, message: str) -> str:
-        """Chat with OpenAI GPT"""
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            response = await client.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {self.openai_api_key}",
-                    "Content-Type": "application/json",
-                },
-                json={
-                    "model": "gpt-4o-mini",
-                    "messages": [{"role": "user", "content": message}],
-                    "max_tokens": 1024,
-                },
+        """Chat with OpenAI GPT using official SDK"""
+        try:
+            response = self.openai_client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": message}],
+                max_tokens=1024,
             )
-
-            if response.status_code != 200:
-                raise ValueError(
-                    f"OpenAI API error: {response.status_code} - {response.text}"
-                )
-
-            data = response.json()
-            if "choices" in data and len(data["choices"]) > 0:
-                return data["choices"][0]["message"]["content"]
+            if response.choices and len(response.choices) > 0:
+                return response.choices[0].message.content or ""
             raise ValueError("No response from OpenAI API")
+        except openai.APIError as e:
+            raise ValueError(f"OpenAI API error: {str(e)}")
