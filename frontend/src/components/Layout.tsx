@@ -52,7 +52,7 @@ export const Layout: FC<LayoutProps> = ({ children }) => {
                             <line x1="3" y1="18" x2="21" y2="18"></line>
                         </svg>
                     </button>
-                    <a href="/dashboard" className="topbar-anchor">
+                    <a href="/" className="topbar-anchor">
                         <div className="anchor-logo">RAG</div>
                     </a>
                     <div className="topbar-brand">
