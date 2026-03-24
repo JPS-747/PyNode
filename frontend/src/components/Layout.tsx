@@ -29,6 +29,7 @@ export const Layout: FC<LayoutProps> = ({ children }) => {
 
     const navItems = [
         { label: 'Dashboard', path: '/dashboard' },
+        { label: 'Contact', path: '/contact' },
     ];
 
     const handleNavClick = (path: string): void => {

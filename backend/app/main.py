@@ -14,6 +14,7 @@ from app.config import settings
 from app.database import create_db_and_tables, get_session
 from app.models import User
 from app.schemas import (
+    ContactMessage,
     MessageResponse,
     RefreshTokenRequest,
     TokenResponse,
@@ -21,6 +22,7 @@ from app.schemas import (
     UserRegister,
     UserResponse,
 )
+from app.telegram_service import TelegramService
 
 app = FastAPI(title=settings.app_name)
 
@@ -116,3 +118,39 @@ def read_current_user(current_user: User = Depends(get_current_user)) -> UserRes
     return UserResponse(
         id=current_user.id, email=current_user.email, full_name=current_user.full_name
     )
+
+
+@app.post("/api/contact", response_model=MessageResponse)
+async def send_contact_message(
+    payload: ContactMessage, current_user: User = Depends(get_current_user)
+) -> MessageResponse:
+    """Send a contact message via Telegram bot"""
+    telegram = TelegramService(
+        bot_token=settings.telegram_bot_token,
+        chat_id=settings.telegram_chat_id,
+    )
+
+    if not telegram.is_configured():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Telegram bot is not configured. Please contact support.",
+        )
+
+    try:
+        await telegram.send_contact_message(
+            user_email=current_user.email,
+            user_name=current_user.full_name,
+            subject=payload.subject,
+            message=payload.message,
+        )
+        return MessageResponse(message="Message sent successfully")
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to send message. Please try again later.",
+        )

@@ -4,6 +4,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { LandingPage } from './pages/LandingPage';
+import { ContactPage } from './pages/ContactPage';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -13,6 +14,16 @@ const App: FC = () => {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route
+                path="/contact"
+                element={
+                    <ProtectedRoute>
+                        <Layout>
+                            <ContactPage />
+                        </Layout>
+                    </ProtectedRoute>
+                }
+            />
             <Route
                 path="/dashboard/*"
                 element={

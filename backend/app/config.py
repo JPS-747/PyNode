@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = 7
     database_url: str = f"sqlite:///{(BASE_DIR / 'app.db').as_posix()}"
     cors_origins: list[str] = ["http://localhost:5173"]
+    telegram_bot_token: str = ""
+    telegram_chat_id: str = ""
 
     model_config = SettingsConfigDict(
         env_file=BASE_DIR / ".env",

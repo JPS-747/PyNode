@@ -76,6 +76,7 @@ export const LandingPage: FC = () => {
                         <a href="#features" className="nav-link">Features</a>
                         <a href="#pricing" className="nav-link">Pricing</a>
                         <a href="#about" className="nav-link">About</a>
+                        {isAuthenticated && <Link to="/contact" className="nav-link">Contact</Link>}
                     </nav>
                     <div className="nav-actions">
                         <Link to="/login" className="nav-btn login-btn">
@@ -238,7 +239,7 @@ export default function App() {
                         <button onClick={handleGetStarted} className="btn-primary btn-lg">
                             Get Started Free
                         </button>
-                        <a href="https://github.com" className="btn-secondary btn-lg">
+                        <a href="https://github.com/JPS-747/PyNode" className="btn-secondary btn-lg">
                             View on GitHub
                         </a>
                     </div>
@@ -271,7 +272,7 @@ export default function App() {
                     <div className="footer-section">
                         <h4>Connect</h4>
                         <ul>
-                            <li><a href="#">GitHub</a></li>
+                            <li><a href="https://github.com/JPS-747/PyNode">GitHub</a></li>
                             <li><a href="#">Twitter</a></li>
                             <li><a href="#">Discord</a></li>
                         </ul>

@@ -30,3 +30,8 @@ class UserResponse(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+
+
+class ContactMessage(BaseModel):
+    subject: str = Field(min_length=3, max_length=200)
+    message: str = Field(min_length=10, max_length=5000)

@@ -25,6 +25,11 @@ interface RefreshTokenPayload {
     refresh_token: string;
 }
 
+interface ContactMessagePayload {
+    subject: string;
+    message: string;
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 async function parseResponse<T>(response: Response): Promise<T> {
@@ -77,4 +82,20 @@ export async function refreshAccessToken(refreshToken: string): Promise<AuthResp
     return parseResponse<AuthResponse>(response);
 }
 
-export type { AuthResponse, UserResponse, RegisterPayload, LoginPayload };
+export async function sendContactMessage(
+    token: string,
+    payload: ContactMessagePayload
+): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/api/contact`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+    });
+
+    return parseResponse<{ message: string }>(response);
+}
+
+export type { AuthResponse, UserResponse, RegisterPayload, LoginPayload, ContactMessagePayload };
